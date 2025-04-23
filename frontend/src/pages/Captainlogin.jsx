@@ -31,7 +31,7 @@ const Captainlogin = () => {
 
           setEmail('');
           setPassword('');
-          console.log(captainData)
+          console.log(captain)
       }
   return (
     <div className='p-7 h-screen flex flex-col justify-between'>
