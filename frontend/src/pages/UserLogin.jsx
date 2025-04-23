@@ -31,7 +31,7 @@ const UserLogin = () => {
 
         setEmail('');
         setPassword('');
-        console.log(userData)
+        // console.log(userData)
     }
     return (
         <div className='p-7 h-screen flex flex-col justify-between'>
