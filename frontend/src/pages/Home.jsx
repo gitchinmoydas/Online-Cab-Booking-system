@@ -12,8 +12,12 @@ import WaitingForDriver from '../components/WaitingForDriver';
 import { SocketContext } from '../context/SocketContext';
 import { useContext } from 'react';
 import { UserDataContext } from '../context/UserContext';
-import { useNavigate } from 'react-router-dom';
-import LiveTracking from '../components/Livetracking';
+import { Link, useNavigate } from 'react-router-dom';
+// import LiveTracking from '../components/Livetracking';
+import PrebookRide from '../components/PrebookRide';
+import LiveTracking from '../components/LiveTracking';
+import { Menu } from 'lucide-react';
+
 
 
 const Home = () => {
@@ -37,9 +41,11 @@ const Home = () => {
   const [destinationSuggestions, setDestinationSuggestions] = useState([])
   const [activeField, setActiveField] = useState(null)
   const [fare, setFare] = useState({})
+  const [isOpen, setIsOpen] = useState(false);
 
 
   const [ride, setRide] = useState(null)
+  const [location, setLocation] = useState({ latitude: null, longitude: null })
 
 
   const navigate = useNavigate()
@@ -48,8 +54,37 @@ const Home = () => {
   const { user } = useContext(UserDataContext)
 
   useEffect(() => {
-    socket.emit("join", { userType: "user", userId: user._id })
-  }, [user])
+    if (!socket || !user) return;
+
+    // Emit 'join' event when component mounts
+    socket.emit("join", { userType: "user", userId: user._id });
+
+    // Start watching position
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setLocation({ latitude, longitude });
+
+        // Emit real-time location to server
+        socket.emit("user-location", {
+          userId: user._id,
+          latitude,
+          longitude
+        });
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 10000,
+        timeout: 10000
+      }
+    );
+
+    // Cleanup the watcher on unmount
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [socket, user]);
 
   socket.on('ride-confirmed', ride => {
 
@@ -209,7 +244,50 @@ const Home = () => {
 
   return (
     <div className='h-screen relative overflow-hidden'>
-      <img className='w-35 absolute left-5 top-5' src={logo} alt="" />
+       <div className="absolute top-5 left-5 z-30 flex items-center gap-x-30">
+      <img className="w-36" src={logo} alt="logo" />
+
+      <div className="relative px-1">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
+        >
+          <Menu className="w-6 h-6 text-gray-700" />
+
+        </button>
+
+        {isOpen && (
+          <div className="absolute left-0 mr-1 mt-2 w-20 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+            <Link
+              to="/ride-history"
+              className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-blue-600"
+              onClick={() => setIsOpen(false)}
+            >
+              History
+            </Link>
+            <button
+              onClick={() => {
+                localStorage.removeItem("token");
+                navigate("/login");
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-red-600"
+            >
+              Logout
+            </button>
+            {/* <button
+              onClick={() => {
+                navigate("/prebooking");
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-red-600"
+            >
+              Prebooking
+            </button> */}
+          </div>
+        )}
+      </div>
+    </div>
+
+
       <div className='h-screen w-screen'>
         {/* image for temporary use  */}
         {/* <img className='h-full w-full object-cover' src="https://miro.medium.com/max/1280/0*gwMx05pqII5hbfmX.gif" alt="img" /> */}
@@ -222,7 +300,7 @@ const Home = () => {
           }} className='absolute opacity-0 right-6 top-6 text-2xl'>
             <i className="ri-arrow-down-line"></i>
           </h5>
-          <h4 className='text-2xl font-semibold'>Find a trip</h4>
+          <h4 className='text-2xl font-semibold '>Find a trip</h4>
           <form className='relative py-3' onSubmit={(e) => {
             submitHandler(e)
           }}>
@@ -258,6 +336,7 @@ const Home = () => {
             className='bg-emerald-600 text-white px-4 py-2 rounded-lg mt-3 w-full'>
             Find Trip
           </button>
+          {/* <PrebookRide/> */}
         </div>
 
         {/* <div className=' bg-red-500 h-0'>
@@ -311,8 +390,13 @@ const Home = () => {
           setVehicleFound={setVehicleFound}
           setWaitingForDriver={setWaitingForDriver}
           waitingForDriver={waitingForDriver} />
+
+
       </div>
+
     </div>
+
+
   )
 }
 

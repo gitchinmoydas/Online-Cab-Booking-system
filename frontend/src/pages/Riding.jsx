@@ -4,6 +4,11 @@ import { useEffect, useContext } from 'react'
 import { SocketContext } from '../context/SocketContext'
 import { useNavigate } from 'react-router-dom'
 import LiveTracking from '../components/Livetracking'
+import axios from 'axios';
+import { AlertTriangle } from 'lucide-react';
+import { toast } from 'react-toastify';
+
+
 
 
 const Riding = () => {
@@ -15,6 +20,97 @@ const Riding = () => {
     socket.on("ride-ended", () => {
         navigate('/home')
     })
+
+
+    const getReadableAddress = async (lat, lng) => {
+        try {
+            const response = await axios.get(
+                `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=1dc9da3411c649d0a6681dd3e2d14d78`
+            );
+            const components = response.data.results[0].formatted;
+            return components; // returns full address string
+        } catch (error) {
+            console.error("Error in reverse geocoding:", error);
+            return `Lat: ${lat}, Lng: ${lng}`; // fallback
+        }
+    };
+
+
+
+    const sendAlert = async () => {
+        const emergencyContact = '+919382204187';
+        const token = localStorage.getItem('token');
+
+        try {
+            // 1️⃣ Get user profile for name
+            const profileRes = await axios.get(
+                `${import.meta.env.VITE_BASE_URL}/users/profile`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            const { firstname, lastname } = profileRes.data.fullname;
+            const userName = `${firstname} ${lastname}`;
+
+            // 2️⃣ Get location using Geolocation API
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
+
+                    // 🔁 Get readable address via Google Maps API
+                    const addressRes = await axios.get(
+                        `https://maps.googleapis.com/maps/api/geocode/json`,
+                        {
+                            params: {
+                                latlng: `${latitude},${longitude}`,
+                                key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+                            }
+                        }
+                    );
+
+                    const location =
+                        addressRes.data.status === 'OK' && addressRes.data.results.length > 0
+                            ? addressRes.data.results[0].formatted_address
+                            : `Lat: ${latitude}, Lng: ${longitude}`;
+
+                    // 3️⃣ Send safety alert with name + location
+                    const res = await axios.post(
+                        `${import.meta.env.VITE_BASE_URL}/rides/alert`,
+                        {
+                            emergencyContact,
+                            userName,
+                            location
+                        },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }
+                    );
+
+                    if (res.data.success) {
+                        toast.success('Safety alert sent successfully!',{
+                    autoClose: 500, 
+                });
+                    }
+                },
+                (error) => {
+                    console.error('Geolocation error:', error.message);
+                    toast.error(' Failed to get location.',{
+                    autoClose: 500, 
+                });
+                }
+            );
+        } catch (err) {
+            console.error('Error:', err.response?.data || err.message);
+            alert('Failed to send safety alert.');
+        }
+    };
+
+
+
 
 
     return (
@@ -58,6 +154,15 @@ const Riding = () => {
                     </div>
                 </div>
                 <button className='w-full mt-5 bg-green-600 text-white font-semibold p-2 rounded-lg'>Make a Payment</button>
+                {/* 🆘 SOS Button */}
+                <button
+                    onClick={sendAlert}
+                    className="fixed bottom-6 right-6 flex items-center gap-2 px-5 py-3 bg-red-600 text-white font-semibold rounded-full shadow-lg hover:bg-red-700 transition-all duration-300 animate-pulse hover:animate-none z-50"
+                >
+                    <AlertTriangle className="w-5 h-5" />
+                    SOS
+                </button>
+
             </div>
         </div>
     )

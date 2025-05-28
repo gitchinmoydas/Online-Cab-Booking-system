@@ -3,6 +3,9 @@ const mapService = require('./maps.service');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
+const twilio = require('twilio');
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
 async function getFare(pickup, destination) {
 
     if (!pickup || !destination) {
@@ -38,6 +41,7 @@ async function getFare(pickup, destination) {
     };
 
     return fare;
+    
 
 
 }
@@ -158,3 +162,42 @@ module.exports.endRide = async ({ rideId, captain }) => {
 
     return ride;
 }
+
+// module.exports.prebookRide = async ({ user, pickup, destination, vehicleType, scheduledTime }) => {
+//     const fare = await getFare(pickup, destination);
+
+//     return await rideModel.create({
+//         user,
+//         pickup,
+//         destination,
+//         vehicleType,
+//         fare: fare[vehicleType],
+//         otp: getOtp(6),
+//         status: 'scheduled',
+//         scheduledTime,
+//         isPrebooked: true
+//     });
+// };
+
+
+module.exports.getCompletedRidesByUser = async (userId) => {
+    console.log('Fetching completed rides for user:', userId);
+    const rides = await rideModel.find({
+        user: userId,
+        status: 'completed'
+    }).populate('captain').sort({ createdAt: -1 });
+
+    console.log('Found rides:', rides);
+    return rides;
+};
+
+
+module.exports.sendSafetyAlert = async ({ to, message }) => {
+    return await client.messages.create({
+        body: message,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: to
+    });
+};
+
+

@@ -3,6 +3,7 @@ const router = express.Router();
 const { body, query } = require('express-validator');
 const rideController = require('../controllers/ride.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
+const { triggerSafetyAlert } = require('../controllers/ride.controller');
 
 
 router.post('/create',
@@ -38,6 +39,25 @@ router.post('/end-ride',
     body('rideId').isMongoId().withMessage('Invalid ride id'),
     rideController.endRide
 )
+
+// router.post('/prebook',
+//     authMiddleware.authUser,
+//     body('pickup').isString(),
+//     body('destination').isString(),
+//     body('vehicleType').isIn(['auto', 'car', 'moto']),
+//     body('scheduledTime').isISO8601().withMessage('Scheduled time is required and must be in ISO format'),
+//     rideController.prebookRide
+// );
+
+
+router.get('/userhistory',
+    authMiddleware.authUser,
+    rideController.getUserRideHistory
+);
+
+router.post('/alert', authMiddleware.authUser, triggerSafetyAlert);
+
+
 
 
 

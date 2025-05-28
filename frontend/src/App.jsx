@@ -7,12 +7,15 @@ import Captainlogin from './pages/Captainlogin'
 import CaptainSignup from './pages/CaptainSignup'
 import Home from './pages/Home'
 import UserProtectWrapper from './pages/UserProtectWrapper'
-import UserLogout from './pages/Userlogout'
+import UserLogout from './pages/UserLogout'
 import CaptainHome from './pages/CaptainHome'
 import CaptainProtectWrapper from './pages/CaptainProtectWrapper'
 import CaptainLogout from './pages/CaptainLogout'
 import Riding from './pages/Riding'
 import CaptainRiding from './pages/CaptainRiding'
+import 'leaflet/dist/leaflet.css';
+import UserRideHistory from './pages/UserRideHistory'
+import PrebookRide from './components/PrebookRide'
 
 
 
@@ -46,6 +49,9 @@ const App = () => {
             <CaptainLogout />
           </CaptainProtectWrapper>
         } />
+
+         <Route path="/ride-history" element={<UserRideHistory />} />
+         {/* <Route path="/prebooking" element={<PrebookRide />} /> */}
 
       </Routes>
     </div>

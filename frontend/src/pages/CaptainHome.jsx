@@ -11,17 +11,17 @@ import { SocketContext } from '../context/SocketContext'
 import { CaptainDataContext } from '../context/CaptainContext'
 import axios from 'axios'
 import ConfirmRidePopUp from '../components/ConfirmRidePopUp'
-import LiveTracking from '../components/Livetracking'
+import LiveTracking from '../components/LiveTracking'
 
 
 const CaptainHome = () => {
 
-    const [ ridePopupPanel, setRidePopupPanel ] = useState(false)
-    const [ confirmRidePopupPanel, setConfirmRidePopupPanel ] = useState(false)
+    const [ridePopupPanel, setRidePopupPanel] = useState(false)
+    const [confirmRidePopupPanel, setConfirmRidePopupPanel] = useState(false)
 
     const ridePopupPanelRef = useRef(null)
     const confirmRidePopupPanelRef = useRef(null)
-    const [ ride, setRide ] = useState(null)
+    const [ride, setRide] = useState(null)
 
     const { socket } = useContext(SocketContext)
     const { captain } = useContext(CaptainDataContext)
@@ -97,7 +97,7 @@ const CaptainHome = () => {
                 transform: 'translateY(100%)'
             })
         }
-    }, [ ridePopupPanel ])
+    }, [ridePopupPanel])
 
     useGSAP(function () {
         if (confirmRidePopupPanel) {
@@ -109,20 +109,34 @@ const CaptainHome = () => {
                 transform: 'translateY(100%)'
             })
         }
-    }, [ confirmRidePopupPanel ])
+    }, [confirmRidePopupPanel])
 
     return (
         <div className='h-screen'>
-            <div className='fixed p-6 top-0 flex items-center justify-between w-screen'>
+            <div className='fixed p-6 top-0 flex items-center justify-between w-screen z-10'>
                 <img className='w-32 absolute left-15 top-5 rounded-2xl ' src={logo} alt="" />
-                <Link to='/captain-home' className=' h-10 w-10 bg-white flex items-center justify-center rounded-full'>
+
+                <div className="absolute right-5 top-5 flex items-center gap-x-4">
+                    <button
+                        onClick={() => {
+                            localStorage.removeItem('token');
+                            window.location.href = '/login'; // or use navigate('/login') if using useNavigate
+                        }}
+                        className="bg-amber-200 hover:bg-amber-400 text-amber-950 px-4 py-2 rounded-md text-sm shadow-amber-50"
+                    >
+                        Logout
+                    </button>
+                </div>
+
+
+                <Link to='/captain-home' className=' h-10 w-10 bg-white flex items-center justify-center rounded-full '>
                     <i className="text-lg font-medium ri-logout-box-r-line"></i>
                 </Link>
             </div>
             <div className='h-3/5'>
-            <LiveTracking/>
+                <LiveTracking />
                 {/* <img className='h-full w-full object-cover' src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif" alt="" /> */}
-                
+
 
             </div>
             <div className='h-2/5 p-6'>

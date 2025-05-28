@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { CaptainDataContext } from '../context/CaptainContext'
+import { toast } from 'react-toastify';
 
 const Captainlogin = () => {
    const [email,setEmail]=useState('');
@@ -17,7 +18,8 @@ const Captainlogin = () => {
               email : email,
               password
           }
-
+          
+           try {
           const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/login`, captain)
 
           if (response.status === 200) {
@@ -25,9 +27,21 @@ const Captainlogin = () => {
       
             setCaptain(data.captain)
             localStorage.setItem('token', data.token)
+            localStorage.setItem('user_type', 'captain');
+            // localStorage.setItem('user', false);
             navigate('/captain-home')
+            toast.success('Captain you are logged in ',{
+                    autoClose: 500, 
+                });
       
           }
+        }catch(error){
+           if (error.response && error.response.status === 401) {
+                          toast.error('Invalid email or password',{
+                    autoClose: 500, 
+                });
+                      } 
+        }
 
           setEmail('');
           setPassword('');

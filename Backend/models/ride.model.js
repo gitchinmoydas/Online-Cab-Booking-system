@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const rideSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -23,21 +22,22 @@ const rideSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-
     status: {
         type: String,
-        enum: [ 'pending', 'accepted', "ongoing", 'completed', 'cancelled' ],
+        enum: ['pending', 'accepted', 'scheduled', 'ongoing', 'completed', 'cancelled'],
         default: 'pending',
     },
-
     duration: {
-        type: Number,
-    }, // in seconds
-
+        type: Number, // in seconds
+    },
     distance: {
-        type: Number,
-    }, // in meters
-
+        type: Number, // in meters
+    },
+    otp: {
+        type: String,
+        select: false,
+        required: true,
+    },
     paymentID: {
         type: String,
     },
@@ -48,11 +48,16 @@ const rideSchema = new mongoose.Schema({
         type: String,
     },
 
-    otp: {
-        type: String,
-        select: false,
-        required: true,
+    // 🆕 Prebooking-related fields
+    isPrebooked: {
+        type: Boolean,
+        default: false,
     },
-})
+    scheduledTime: {
+        type: Date, // time when the ride is scheduled
+    },
+}, {
+    timestamps: true,
+});
 
 module.exports = mongoose.model('ride', rideSchema);
