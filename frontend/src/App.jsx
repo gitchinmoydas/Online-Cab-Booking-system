@@ -16,6 +16,7 @@ import CaptainRiding from './pages/CaptainRiding'
 import 'leaflet/dist/leaflet.css';
 import UserRideHistory from './pages/UserRideHistory'
 import PrebookRide from './components/PrebookRide'
+import EmergencyContacts from './pages/EmergencyContacts'
 
 
 
@@ -51,6 +52,7 @@ const App = () => {
         } />
 
          <Route path="/ride-history" element={<UserRideHistory />} />
+         <Route path="/emergency-contact" element={<EmergencyContacts />} />
          {/* <Route path="/prebooking" element={<PrebookRide />} /> */}
 
       </Routes>

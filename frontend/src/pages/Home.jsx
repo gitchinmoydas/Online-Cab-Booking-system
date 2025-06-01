@@ -13,10 +13,10 @@ import { SocketContext } from '../context/SocketContext';
 import { useContext } from 'react';
 import { UserDataContext } from '../context/UserContext';
 import { Link, useNavigate } from 'react-router-dom';
-// import LiveTracking from '../components/Livetracking';
 import PrebookRide from '../components/PrebookRide';
-import LiveTracking from '../components/LiveTracking';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import LiveTracking from '../components/Livetracking';
+import EmergencyContacts from './EmergencyContacts';
 
 
 
@@ -46,6 +46,8 @@ const Home = () => {
 
   const [ride, setRide] = useState(null)
   const [location, setLocation] = useState({ latitude: null, longitude: null })
+
+   const [showEmergency, setShowEmergency] = useState(false);
 
 
   const navigate = useNavigate()
@@ -247,8 +249,8 @@ const Home = () => {
        <div className="absolute top-5 left-5 z-30 flex items-center gap-x-30">
       <img className="w-36" src={logo} alt="logo" />
 
-      <div className="relative px-1">
-        <button
+     <div className="relative inline-block text-left">
+      <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
         >
@@ -256,35 +258,51 @@ const Home = () => {
 
         </button>
 
-        {isOpen && (
-          <div className="absolute left-0 mr-1 mt-2 w-20 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-            <Link
-              to="/ride-history"
-              className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-blue-600"
-              onClick={() => setIsOpen(false)}
-            >
-              History
-            </Link>
+      {isOpen && (
+        <div className="absolute left-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+          <Link
+            to="/ride-history"
+            className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-blue-600"
+            onClick={() => setIsOpen(false)}
+          >
+            History
+          </Link>
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              navigate("/login");
+            }}
+            className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-red-600"
+          >
+            Logout
+          </button>
+          <button
+            onClick={() => {
+              setShowEmergency(true); // ✅ Open modal
+              setIsOpen(false);
+            }}
+            className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-red-600"
+          >
+            Emergency
+          </button>
+        </div>
+      )}
+
+      {/* ✅ Floating Modal */}
+      {showEmergency&& (
+        <div className="fixed inset-0 z-50 bg-transparent  flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg p-4  max-w-lg relative">
             <button
-              onClick={() => {
-                localStorage.removeItem("token");
-                navigate("/login");
-              }}
-              className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-red-600"
+              onClick={() => setShowEmergency(false)}
+              className="absolute top-2 right-3 text-gray-600 hover:text-red-600 text-xl"
             >
-              Logout
+              <X className="w-6 h-6" />
             </button>
-            {/* <button
-              onClick={() => {
-                navigate("/prebooking");
-              }}
-              className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-red-600"
-            >
-              Prebooking
-            </button> */}
+            <EmergencyContacts closeModal={() => setShowEmergency(false)} />
           </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
     </div>
 
 

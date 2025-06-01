@@ -55,6 +55,7 @@ const UserLogout = () => {
 
     return (
         <div className="flex flex-col items-center justify-center h-screen">
+            <h1 className="text-2xl mb-6 font-semibold">Are you sure you want to log out?</h1>
             <button
                 onClick={handleLogout}
                 className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-all"

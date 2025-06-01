@@ -49,13 +49,13 @@ const rideSchema = new mongoose.Schema({
     },
 
     // 🆕 Prebooking-related fields
-    isPrebooked: {
-        type: Boolean,
-        default: false,
-    },
-    scheduledTime: {
-        type: Date, // time when the ride is scheduled
-    },
+    // isPrebooked: {
+    //     type: Boolean,
+    //     default: false,
+    // },
+    // scheduledTime: {
+    //     type: Date, // time when the ride is scheduled
+    // },
 }, {
     timestamps: true,
 });

@@ -4,6 +4,7 @@ const mapService = require('../services/maps.service');
 const { sendMessageToSocketId } = require('../socket');
 const rideModel = require('../models/ride.model');
 const { sendSafetyAlert } = require('../services/ride.service');
+const User = require('../models/user.model');
 
 
 
@@ -169,16 +170,50 @@ module.exports.getUserRideHistory = async (req, res) => {
     }
 };
 
+// ✅ In your controller
 module.exports.triggerSafetyAlert = async (req, res) => {
-    const { emergencyContact, userName, location } = req.body;
+    const { emergencyContacts, userName, location } = req.body;
 
     try {
         const message = `${userName} feels unsafe during their Zyber-Cab ride. Current location: ${location}`;
-        await sendSafetyAlert({ to: emergencyContact, message });
-        res.status(200).json({ success: true, message: 'Alert sent successfully.' });
+
+        // Send message to all emergency contacts
+        const sendAll = emergencyContacts.map((contact) =>
+            sendSafetyAlert({ to: contact, message })
+        );
+
+        await Promise.all(sendAll);
+
+        res.status(200).json({ success: true, message: 'Alerts sent successfully.' });
     } catch (err) {
-        console.error('Error sending safety alert:', err);
-        res.status(500).json({ success: false, message: 'Failed to send alert.' });
+        console.error('Error sending safety alerts:', err);
+        res.status(500).json({ success: false, message: 'Failed to send alerts.' });
+    }
+};
+
+
+// controllers/userController.js
+
+
+module.exports.updateEmergencyContacts = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { emergencyContacts } = req.body;
+
+        if (!Array.isArray(emergencyContacts)) {
+            return res.status(400).json({ message: 'Emergency contacts must be an array.' });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { emergencyContacts },
+            { new: true }
+        );
+
+        res.status(200).json({ success: true, data: user.emergencyContacts });
+    } catch (err) {
+        console.error('Update emergency contacts error:', err);
+        res.status(500).json({ success: false, message: 'Failed to update emergency contacts.' });
     }
 };
 

@@ -57,6 +57,10 @@ router.get('/userhistory',
 
 router.post('/alert', authMiddleware.authUser, triggerSafetyAlert);
 
+// routes/userRoutes.js
+router.put('/emergency-contacts', authMiddleware.authUser, rideController.updateEmergencyContacts);
+
+
 
 
 
