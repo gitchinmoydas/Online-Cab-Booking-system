@@ -12,6 +12,8 @@ import { CaptainDataContext } from '../context/CaptainContext'
 import axios from 'axios'
 import ConfirmRidePopUp from '../components/ConfirmRidePopUp'
 import LiveTracking from '../components/LiveTracking'
+import UserChatBox from '../components/UserChatBox'
+import CaptainChatBox from '../components/CaptainChatBox'
 
 
 const CaptainHome = () => {
@@ -22,15 +24,21 @@ const CaptainHome = () => {
     const ridePopupPanelRef = useRef(null)
     const confirmRidePopupPanelRef = useRef(null)
     const [ride, setRide] = useState(null)
+    const [rideData, setRideData] = useState(null);
+    const [analytics, setAnalytics] = useState()
+    // let rideData;
 
     const { socket } = useContext(SocketContext)
     const { captain } = useContext(CaptainDataContext)
 
+
     useEffect(() => {
         socket.emit('join', {
             userId: captain._id,
+
             userType: 'captain'
         })
+        // console.log("This is captain id : ", captain._id);
         const updateLocation = () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(position => {
@@ -57,15 +65,34 @@ const CaptainHome = () => {
         updateLocation()
 
         // return () => clearInterval(locationInterval)
+
+        const fetchAnalytics = async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/captains/analytics`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                console.log("Data ", res.data)
+                setAnalytics(res.data);
+            } catch (err) {
+                console.error('Error fetching analytics:', err);
+            }
+        };
+
+        fetchAnalytics();
+        // console.log("analytics",analytics);
+
     }, [])
 
     socket.on('new-ride', (data) => {
-        console.log(data);
+        // console.log("Test new ride "+data);
 
         setRide(data)
         setRidePopupPanel(true)
 
     })
+
 
     async function confirmRide() {
 
@@ -80,11 +107,41 @@ const CaptainHome = () => {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
             }
         })
+        // console.log("Ride user  data ",response.data.user._id); 
+        // console.log("Ride data captain ",response.data.captain._id); 
+        setRideData(response.data);
+        //  console.log("data -> ",rideData.user);
+
 
         setRidePopupPanel(false)
         setConfirmRidePopupPanel(true)
 
     }
+
+    const cancelRide = async () => {
+        try {
+            const res=await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/cancel`, {
+                rideId: ride._id,
+                cancelledBy: 'captain'
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            // Optional: Emit socket event to notify user
+            socket.emit('ride-cancelled', { rideId: ride._id });
+            console.log(res.data);
+
+            // Hide popup after cancelling
+            // setRidePopupPanel(false);
+            setRide(null);
+        } catch (error) {
+            console.error('Error cancelling ride:', error);
+        }
+    };
+
+
 
 
     useGSAP(function () {
@@ -140,7 +197,7 @@ const CaptainHome = () => {
 
             </div>
             <div className='h-2/5 p-6'>
-                <CaptainDetails />
+                <CaptainDetails analytics={analytics} />
             </div>
             <div ref={ridePopupPanelRef} className='fixed w-full z-10 bottom-0  bg-white px-3 py-10 pt-12'>
                 <RidePopUp
@@ -148,12 +205,21 @@ const CaptainHome = () => {
                     setRidePopupPanel={setRidePopupPanel}
                     setConfirmRidePopupPanel={setConfirmRidePopupPanel}
                     confirmRide={confirmRide}
+                    
                 />
             </div>
             <div ref={confirmRidePopupPanelRef} className='fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
                 <ConfirmRidePopUp
+                    rideData={rideData}
                     ride={ride}
-                    setConfirmRidePopupPanel={setConfirmRidePopupPanel} setRidePopupPanel={setRidePopupPanel} />
+                    setConfirmRidePopupPanel={setConfirmRidePopupPanel} setRidePopupPanel={setRidePopupPanel} 
+                    cancelRide={cancelRide} // 👈 pass it here
+                    />
+
+                {/* 👇 ChatBox appears only when ride is ongoing/confirmed */}
+                {/* {ride && (
+                    <CaptainChatBox ride={rideData} />
+                )} */}
             </div>
         </div>
     )

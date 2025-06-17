@@ -47,6 +47,17 @@ const rideSchema = new mongoose.Schema({
     signature: {
         type: String,
     },
+    // ⭐ Rating & Review (for analytics)
+    rating: {
+        type: Number,
+        min: 1,
+        max: 5,
+        default: null,
+    },
+    review: {
+        type: String,
+        default: '',
+    },
 
     // 🆕 Prebooking-related fields
     // isPrebooked: {

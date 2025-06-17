@@ -84,6 +84,31 @@ function initializeSocket(server) {
             // io.emit('user-location-update', { userId, location });
         });
 
+
+        // Chat message between user and captain
+        socket.on('chat-message', async ({ senderId, receiverId, message, senderType }) => {
+            try {
+                let receiver;
+                if (senderType === 'user') {
+                    receiver = await captainModel.findById(receiverId);
+                } else {
+                    receiver = await userModel.findById(receiverId);
+                }
+
+                if (receiver && receiver.socketId) {
+                    io.to(receiver.socketId).emit('chat-message', {
+                        senderId,
+                        message,
+                        senderType,
+                        timestamp: new Date()
+                    });
+                }
+            } catch (err) {
+                console.error('Error sending chat message:', err);
+            }
+        });
+
+
         // Disconnect
         socket.on('disconnect', async () => {
             console.log(`Client disconnected: ${socket.id}`);
@@ -108,6 +133,8 @@ function initializeSocket(server) {
                 { isOnline: false }
             );
         });
+
+
     });
 }
 

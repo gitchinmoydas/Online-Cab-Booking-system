@@ -30,5 +30,7 @@ router.get('/profile', authMiddleware.authCaptain, captainController.getCaptainP
 
 router.get('/logout', authMiddleware.authCaptain, captainController.logoutCaptain)
 
+router.get('/analytics', authMiddleware.authCaptain, captainController.getCaptainAnalytics);
+
 
 module.exports = router;

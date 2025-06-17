@@ -17,6 +17,7 @@ import PrebookRide from '../components/PrebookRide';
 import { Menu, X } from 'lucide-react';
 import LiveTracking from '../components/Livetracking';
 import EmergencyContacts from './EmergencyContacts';
+import UserChatBox from '../components/UserChatBox';
 
 
 
@@ -102,10 +103,15 @@ const Home = () => {
     navigate('/riding', { state: { ride } }) // Updated navigate to include ride data
   })
 
+  socket.on('ride-cancelled', ride=>{
+      setWaitingForDriver(false)
+  })
+
 
 
   const handlePickupChange = async (e) => {
     setPickup(e.target.value)
+    
     try {
       const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`, {
         params: { input: e.target.value },
@@ -309,7 +315,8 @@ const Home = () => {
       <div className='h-screen w-screen'>
         {/* image for temporary use  */}
         {/* <img className='h-full w-full object-cover' src="https://miro.medium.com/max/1280/0*gwMx05pqII5hbfmX.gif" alt="img" /> */}
-        <LiveTracking />
+        
+        <LiveTracking pickup={pickup} destination={destination}  />
       </div>
       <div className=' flex flex-col justify-end h-screen absolute top-0 w-full'>
         <div className='h-[30%] p-6 bg-white relative'>
@@ -411,6 +418,15 @@ const Home = () => {
 
 
       </div>
+
+      {ride && waitingForDriver && (
+  <div className="fixed bottom-24 right-4 z-50">
+    <UserChatBox
+      ride={ride}
+    />
+  </div>
+)}
+          
 
     </div>
 

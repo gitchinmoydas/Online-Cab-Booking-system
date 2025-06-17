@@ -218,5 +218,183 @@ module.exports.updateEmergencyContacts = async (req, res) => {
 };
 
 
+// module.exports.cancelRideController = async (req, res) => {
+//   const { rideId } = req.body;
+
+//   try {
+//     const ride = await rideModel.findById(rideId).populate('user captain');
+//     if (!ride) {
+//       return res.status(404).json({ message: 'Ride not found' });
+//     }
+
+//     // Check who is cancelling
+//     let cancelledBy = 'unknown';
+
+//     if (req.user && ride.user._id.toString() === req.user._id.toString()) {
+//       cancelledBy = 'user';
+//     } else if (req.captain && ride.captain._id.toString() === req.captain._id.toString()) {
+//       cancelledBy = 'captain';
+//     } else {
+//       return res.status(403).json({ message: 'Not authorized to cancel this ride' });
+//     }
+
+//     ride.status = 'cancelled';
+//     ride.cancelledBy = cancelledBy;
+//     await ride.save();
+
+//     // ✅ Emit to both parties if socketId is available
+//     if (ride.user.socketId) {
+//       sendMessageToSocketId(ride.user.socketId, {
+//         event: 'ride-cancelled',
+//         data: { rideId: ride._id, cancelledBy }
+//       });
+//     }
+
+//     if (ride.captain?.socketId) {
+//       sendMessageToSocketId(ride.captain.socketId, {
+//         event: 'ride-cancelled',
+//         data: { rideId: ride._id, cancelledBy }
+//       });
+//     }
+
+//     return res.status(200).json({ message: 'Ride cancelled', cancelledBy });
+
+//   } catch (err) {
+//     console.error('Cancel Ride Error:', err);
+//     return res.status(500).json({ message: 'Internal server error' });
+//   }
+// };
 
 
+
+
+// module.exports.cancelRideController = async (req, res) => {
+//   const { rideId } = req.body;
+
+//   try {
+//     const ride = await rideModel.findById(rideId).populate('user captain');
+//     if (!ride) {
+//       return res.status(404).json({ message: 'Ride not found' });
+//     }
+
+//     // Debug logs (optional - can remove in production)
+//     console.log('🔁 Ride cancellation requested');
+//     console.log('Ride ID:', ride._id);
+//     console.log('Ride user:', ride.user?._id?.toString());
+//     console.log('Ride captain:', ride.captain?._id?.toString());
+//     console.log('Requesting user:', req.user?._id?.toString());
+//     console.log('Requesting captain:', req.captain?._id?.toString());
+
+//     // Check who is cancelling
+//     let cancelledBy = 'unknown';
+
+//     if (req.user && ride.user._id.toString() === req.user._id.toString()) {
+//       cancelledBy = 'user';
+//     } else if (
+//       req.captain &&
+//       ride.captain &&
+//       ride.captain._id.toString() === req.captain._id.toString()
+//     ) {
+//       cancelledBy = 'captain';
+//     } else {
+//       return res.status(403).json({ message: 'Not authorized to cancel this ride' });
+//     }
+
+//     ride.status = 'cancelled';
+//     ride.cancelledBy = cancelledBy;
+//     await ride.save();
+
+//     // Emit to user
+//     if (ride.user?.socketId) {
+//       sendMessageToSocketId(ride.user.socketId, {
+//         event: 'ride-cancelled',
+//         data: { rideId: ride._id, cancelledBy }
+//       });
+//     }
+
+//     // Emit to captain
+//     if (ride.captain?.socketId) {
+//       sendMessageToSocketId(ride.captain.socketId, {
+//         event: 'ride-cancelled',
+//         data: { rideId: ride._id, cancelledBy }
+//       });
+//     }
+
+//     return res.status(200).json({
+//       message: 'Ride cancelled successfully',
+//       cancelledBy
+//     });
+//   } catch (err) {
+//     console.error('❌ Cancel Ride Error:', err);
+//     return res.status(500).json({ message: 'Internal server error' });
+//   }
+// };
+
+
+module.exports.cancelRideController = async (req, res) => {
+  const { rideId } = req.body;
+
+  try {
+    const ride = await rideModel.findById(rideId).populate('user captain');
+    if (!ride) {
+      return res.status(404).json({ message: 'Ride not found' });
+    }
+
+    console.log("🔁 Ride cancellation requested");
+    console.log("Ride ID:", ride._id);
+    console.log("Ride user:", ride.user?._id);
+    console.log("Ride captain:", ride.captain?._id);
+    console.log("Requesting user:", req.user?._id);
+    console.log("Requesting captain:", req.captain?._id);
+
+    // Check who is cancelling
+    let cancelledBy = 'unknown';
+
+    // Case: Ride cancelled by the user who booked it
+    if (req.user && ride.user._id.toString() === req.user._id.toString()) {
+      cancelledBy = 'user';
+    }
+    // Case: Ride cancelled by the captain assigned to it
+    else if (
+      req.captain &&
+      ride.captain &&
+      ride.captain._id.toString() === req.captain._id.toString()
+    ) {
+      cancelledBy = 'captain';
+    }
+    // Case: Ride cancelled by any captain if not assigned yet
+    else if (
+      req.captain &&
+      !ride.captain // No captain assigned yet
+    ) {
+      cancelledBy = 'captain';
+    } else {
+      return res.status(403).json({ message: 'Not authorized to cancel this ride' });
+    }
+
+    ride.status = 'cancelled';
+    ride.cancelledBy = cancelledBy;
+    await ride.save();
+
+    // Emit socket event to both parties if available
+    if (ride.user?.socketId) {
+      sendMessageToSocketId(ride.user.socketId, {
+        event: 'ride-cancelled',
+        data: { rideId: ride._id, cancelledBy }
+      });
+    }
+
+    if (ride.captain?.socketId) {
+      sendMessageToSocketId(ride.captain.socketId, {
+        event: 'ride-cancelled',
+        data: { rideId: ride._id, cancelledBy }
+      });
+    }
+
+    return res.status(200).json({ message: 'Ride cancelled', cancelledBy });
+
+  } catch (err) {
+    console.error('Cancel Ride Error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};

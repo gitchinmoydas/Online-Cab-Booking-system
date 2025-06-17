@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import CaptainChatBox from './CaptainChatBox'
 
 const ConfirmRidePopUp = (props) => {
   const [otp, setOtp] = useState('')
@@ -65,7 +66,7 @@ const ConfirmRidePopUp = (props) => {
             alt='User'
           />
           <h2 className='text-lg font-medium capitalize'>
-            {props.ride?.user.fullname.firstname}
+            {props.rideData?.user.fullname.firstname}
           </h2>
         </div>
         <h5 className='text-lg font-semibold'>2.2 KM</h5>
@@ -77,7 +78,7 @@ const ConfirmRidePopUp = (props) => {
             <i className='ri-map-pin-user-fill'></i>
             <div>
               <h3 className='text-lg font-medium'>Pickup</h3>
-              <p className='text-sm -mt-1 text-gray-600'>{props.ride?.pickup}</p>
+              <p className='text-sm -mt-1 text-gray-600'>{props.rideData?.pickup}</p>
             </div>
           </div>
 
@@ -85,16 +86,19 @@ const ConfirmRidePopUp = (props) => {
             <i className='text-lg ri-map-pin-2-fill'></i>
             <div>
               <h3 className='text-lg font-medium'>Destination</h3>
-              <p className='text-sm -mt-1 text-gray-600'>{props.ride?.destination}</p>
+              <p className='text-sm -mt-1 text-gray-600'>{props.rideData?.destination}</p>
             </div>
           </div>
 
           <div className='flex items-center gap-5 p-3'>
             <i className='ri-currency-line'></i>
             <div>
-              <h3 className='text-lg font-medium'>₹{props.ride?.fare}</h3>
+              <h3 className='text-lg font-medium'>₹{props.rideData?.fare}</h3>
               <p className='text-sm -mt-1 text-gray-600'>Cash</p>
             </div>
+            {props.ride && (
+                    <CaptainChatBox ride={props.rideData} />
+                )} 
           </div>
         </div>
 
@@ -121,6 +125,7 @@ const ConfirmRidePopUp = (props) => {
               onClick={() => {
                 props.setConfirmRidePopupPanel(false)
                 props.setRidePopupPanel(false)
+                props.cancelRide();
               }}
               className='w-full mt-2 bg-red-600 text-lg text-white font-semibold p-3 rounded-lg'
             >
