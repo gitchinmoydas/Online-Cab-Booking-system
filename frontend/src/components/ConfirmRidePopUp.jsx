@@ -78,7 +78,7 @@ const ConfirmRidePopUp = (props) => {
             <i className='ri-map-pin-user-fill'></i>
             <div>
               <h3 className='text-lg font-medium'>Pickup</h3>
-              <p className='text-sm -mt-1 text-gray-600'>{props.rideData?.pickup}</p>
+              <p className='text-sm -mt-1 text-gray-600 line-clamp-1'>{props.rideData?.pickup}</p>
             </div>
           </div>
 
@@ -86,7 +86,7 @@ const ConfirmRidePopUp = (props) => {
             <i className='text-lg ri-map-pin-2-fill'></i>
             <div>
               <h3 className='text-lg font-medium'>Destination</h3>
-              <p className='text-sm -mt-1 text-gray-600'>{props.rideData?.destination}</p>
+              <p className='text-sm -mt-1 text-gray-600 line-clamp-1'>{props.rideData?.destination}</p>
             </div>
           </div>
 

@@ -1,41 +1,100 @@
-import React from 'react'
+import React, { useEffect } from "react";
+import { useRef } from "react";
+import audio from "./search.mp3";
 
-const LookingForDriver = (props) => {
-    return (
-        <div>
-            <h5 className='p-1 text-center w-[93%] absolute top-0' onClick={() => {
-                props.setVehicleFound(false)
-            }}><i className="text-3xl text-gray-200 ri-arrow-down-wide-line"></i></h5>
-            <h3 className='text-2xl font-semibold mb-5'>Looking for a Driver</h3>
+const LookingForDriver = ({
+  pickup,
+  destination,
+  fare,
+  vehicleType,
+  setVehicleFound,
+}) => {
+  const audioRef = useRef(null);
 
-            <div className='flex gap-2 justify-between flex-col items-center'>
-                <img className='h-20' src="https://swyft.pl/wp-content/uploads/2023/05/how-many-people-can-a-uberx-take.jpg" alt="" />
-                <div className='w-full mt-5'>
-                    <div className='flex items-center gap-5 p-3 border-b-2'>
-                        <i className="ri-map-pin-user-fill"></i>
-                        <div>
-                            <h3 className='text-lg font-medium'>562/11-A</h3>
-                            <p className='text-sm -mt-1 text-gray-600'>{props.pickup}</p>
-                        </div>
-                    </div>
-                    <div className='flex items-center gap-5 p-3 border-b-2'>
-                        <i className="text-lg ri-map-pin-2-fill"></i>
-                        <div>
-                            <h3 className='text-lg font-medium'>562/11-A</h3>
-                            <p className='text-sm -mt-1 text-gray-600'>{props.destination}</p>
-                        </div>
-                    </div>
-                    <div className='flex items-center gap-5 p-3'>
-                        <i className="ri-currency-line"></i>
-                        <div>
-                            <h3 className='text-lg font-medium'>₹{props.fare[ props.vehicleType ]} </h3>
-                            <p className='text-sm -mt-1 text-gray-600'>Cash Cash</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  // useEffect(() => {
+  //   // Play the audio when the component mounts
+  //   if (audioRef.current) {
+  //     audioRef.current.play().catch((err) => {
+  //       console.warn("Auto-play prevented:", err);
+  //     });
+  //   }
+
+  //   return () => {
+  //     // Stop the audio when the component unmounts
+  //     // if (audioRef.current) {
+  //     //   audioRef.current.pause();
+  //     //   audioRef.current.currentTime = 0;
+  //     // }
+  //   };
+  // }, []);
+  return (
+    <div className="relative bg-white rounded-2xl shadow-md p-4 text-gray-800 max-w-md mx-auto">
+      {/* Sound */}
+      {/* <audio ref={audioRef} >
+        <source src={audio} type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio> */}
+
+      {/* Close Button - now top-right */}
+      <button
+        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition z-10"
+        onClick={() => setVehicleFound(false)}
+      >
+        <i className="ri-arrow-down-wide-line text-2xl"></i>
+      </button>
+
+      {/* Animated Dots - now near title */}
+      <div className="absolute top-3 left-4 flex gap-1">
+        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:0s]"></span>
+        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.15s]"></span>
+        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.3s]"></span>
+      </div>
+
+      {/* Title */}
+      <div className="text-center mt-6">
+        <h3 className="text-xl font-bold mb-1">Searching for a Driver...</h3>
+        <p className="text-sm text-gray-500">
+          Please hold on while we connect you
+        </p>
+      </div>
+
+      {/* Car Image */}
+      <div className="flex justify-center mt-4 mb-6">
+        <img
+          src="https://swyft.pl/wp-content/uploads/2023/05/how-many-people-can-a-uberx-take.jpg"
+          alt="Searching Car"
+          className="w-32 h-20 object-cover rounded-lg"
+        />
+      </div>
+
+      {/* Trip Details */}
+      <div className="space-y-4 text-sm">
+        <div className="flex items-start gap-3 border-b pb-2">
+          <i className="ri-map-pin-user-fill text-xl text-indigo-600"></i>
+          <div>
+            <p className="text-gray-700 font-medium">Pickup Location</p>
+            <p className="text-gray-500 line-clamp-1">{pickup}</p>
+          </div>
         </div>
-    )
-}
 
-export default LookingForDriver
+        <div className="flex items-start gap-3 border-b pb-2">
+          <i className="ri-map-pin-2-fill text-xl text-red-500"></i>
+          <div>
+            <p className="text-gray-700 font-medium">Destination</p>
+            <p className="text-gray-500 line-clamp-1">{destination}</p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <i className="ri-currency-line text-xl text-green-600"></i>
+          <div>
+            <p className="text-gray-700 font-medium">Estimated Fare</p>
+            <p className="text-gray-500">₹{fare?.[vehicleType]} (Cash)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LookingForDriver;

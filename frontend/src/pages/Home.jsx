@@ -253,16 +253,24 @@ const Home = () => {
   return (
     <div className='h-screen relative overflow-hidden'>
        <div className="absolute top-5 left-5 z-30 flex items-center gap-x-30">
-      <img className="w-36" src={logo} alt="logo" />
+        
+     {!panelOpen && (
+  <img className="w-36" src={logo} alt="logo" />
+)}
 
      <div className="relative inline-block text-left">
+      {!panelOpen && (
       <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
         >
-          <Menu className="w-6 h-6 text-gray-700" />
+          
+            <Menu className="w-6 h-6 text-gray-700" />
+         
+          
 
         </button>
+         )}
 
       {isOpen && (
         <div className="absolute left-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50">
@@ -358,7 +366,7 @@ const Home = () => {
           <button
             onClick={findTrip}
 
-            className='bg-emerald-600 text-white px-4 py-2 rounded-lg mt-3 w-full'>
+            className='bg-emerald-600 text-white px-4 py-2 rounded-lg mt-5 w-full'>
             Find Trip
           </button>
           {/* <PrebookRide/> */}
