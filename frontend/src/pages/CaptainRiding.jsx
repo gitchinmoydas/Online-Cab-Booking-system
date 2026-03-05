@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import FinishRide from '../components/FinishRide'
-import LiveTracking from '../components/Livetracking';
+import LiveTracking from '../components/LiveTracking';
 
 import logo from "./logo.png"
 
