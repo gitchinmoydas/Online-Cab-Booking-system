@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom' // Added useLocation
 import { useEffect, useContext } from 'react'
 import { SocketContext } from '../context/SocketContext'
 import { useNavigate } from 'react-router-dom'
-import LiveTracking from '../components/Livetracking'
+import LiveTracking from '../components/LiveTracking'
 import axios from 'axios';
 import { AlertTriangle, AlertTriangleIcon } from 'lucide-react';
 import { toast } from 'react-toastify';
